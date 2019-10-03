@@ -5,7 +5,7 @@
 	"license" : "MIT",
 	"require" : {
     },
-	"autoload" : { "psr-4": { "Arz\\StringEvaluationBundle": "" } },
+	"autoload" : { "psr-4": { "Arz\\StringEvaluationBundle\\": "" } },
 	"branch-alias" : {
         "dev-master" : "1.1-dev"
     }
