@@ -3,8 +3,8 @@ namespace Arz\StringEvaluationBundle;
 
 class StringEvaluator
 {
-    public function evaluate(expression)
+    public function evaluate(string $expression)
     {
-        return '!'.expression.'!';
+        return '!'.$expression.'!';
     }
 }
