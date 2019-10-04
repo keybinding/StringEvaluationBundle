@@ -1,5 +1,5 @@
 <?php
-namespace Arz\StringEvaluationBundle
+namespace Arz\StringEvaluationBundle;
 
 class StringEvaluator
 {
