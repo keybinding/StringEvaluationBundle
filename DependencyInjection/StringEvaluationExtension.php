@@ -8,6 +8,6 @@ class StringEvaluationExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
-        // ... you'll load the files here later
+        var_dump('We\'re alive!');die;
     }
 }
