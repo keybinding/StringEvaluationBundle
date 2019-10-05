@@ -8,7 +8,7 @@ class StringEvaluator
     public function evaluate($expression)
     {
         try {
-            $res = $this->solve($expression);
+            $res = $this->solveFlat2($expression);
         } catch (Exception $e) {
             return $e->getMessage();
         }
@@ -51,6 +51,11 @@ class StringEvaluator
         return $flatExpression;
     }
 
+    private function solveFlat2($flatExpression){
+        preg_match_all('(([0-9]*[\.][0-9]+) | ([0-9]+[\.][0-9]*))|([0-9]+)', $flatExpression, $matches);
+        return var_dump($matches);
+    }
+
     private function parseNumberRight($expression, $pos){
         return 0;
     }
@@ -68,7 +73,7 @@ class StringEvaluator
         while ($pos !== false) {
             $closing_pos = $this->findClosingBracket(substr($expression, $pos + 1));
             $value = $this->solve(substr($expression, $pos + 1, $closing_pos));
-            $expression = substr($expression, 0, $pos) . ' ' . $value . ' ' . substr($expression, $pos + $closing_pos + 1);
+            $expression = substr($expression, 0, $pos) . $value . substr($expression, $pos + $closing_pos + 1);
             $pos = strpos($expression, '(');
             $oPos = strpos($expression, ')');
             if ($oPos < $pos) throw new Exception('Лишняя открывающая скобка');
