@@ -52,7 +52,7 @@ class StringEvaluator
     }
 
     private function solveFlat2($flatExpression){
-        preg_match_all('[0-9]+(\.[0-9]+)?', $flatExpression, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all('#[0-9]+(\.[0-9]+)?#', $flatExpression, $matches, PREG_OFFSET_CAPTURE);
         return var_dump($matches);
     }
 
