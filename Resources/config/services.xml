@@ -5,7 +5,11 @@
         https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <defaults autowire="true" autoconfigure="true" public="false"/>
+        <service id="Arz\StringEvaluationBundle\DefaultOperationProvider" public="false"/>
+        <service id="default.operation.provider" alias="Arz\StringEvaluationBundle\DefaultOperationProvider" public="true"/>
 		<service id="Arz\StringEvaluationBundle\StringEvaluator" public="true">
-		</service>
+            <argument key="$operationsProvider" type="service" id="default.operation.provider"/>
+        </service>
     </services>
 </container>
