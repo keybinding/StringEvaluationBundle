@@ -7,7 +7,7 @@ class StringEvaluator
 {
     public function evaluate($expression)
     {
-        $this->solver = new DefaultOperationProvider();
+        $this->operationsProvider = new DefaultOperationProvider();
         try {
             $res = $this->solve($expression);
         } catch (Exception $e) {
@@ -81,7 +81,7 @@ class StringEvaluator
             $startPos = $numbers[$i][1] + strlen($numbers[$i][0]);
             $endPos = $numbers[$j][1];
             $operationHolder = substr($flatExpression, $startPos, $endPos - $startPos);
-            foreach (['*', '/', '+', '-'] as $operation){
+            foreach ($this->operations as $operation){
                 $pos = strpos($operationHolder, $operation);
                 if ($pos !== false){
                     $operations[] = $operation;
@@ -92,6 +92,7 @@ class StringEvaluator
                         }
                     }
                 }
+                break;
             }
         }
         $numbers = array_column($numbers, 0);
