@@ -48,7 +48,7 @@ class StringEvaluator
     private function processOperations($numOperMap, $operationsToProcess){
         $callbacks = [];
         foreach ($this->operations as $o){
-            $callbacks[$o] = $this->operationsProvider->getOperationCallback[$o];
+            $callbacks[$o] = $this->operationsProvider->getOperationCallback([$o]);
         }
         $operCnt = count($numOperMap['operations']);
         $i = 0;
