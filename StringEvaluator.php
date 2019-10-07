@@ -95,8 +95,8 @@ class StringEvaluator
                             $numbers[$j][1] -= 1;
                         }
                     }
+                    break;
                 }
-                break;
             }
         }
         $numbers = array_column($numbers, 0);
