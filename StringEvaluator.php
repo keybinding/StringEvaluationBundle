@@ -5,9 +5,12 @@ use Exception;
 
 class StringEvaluator
 {
+    public function __construct(IOperationsProvider $operationsProvider){
+        $this->operationsProvider = $operationsProvider;
+    }
+
     public function evaluate($expression)
     {
-        $this->operationsProvider = new DefaultOperationProvider();
         $this->operations = ['*', '/', '+', '-'];
         try {
             $res = $this->solve($expression);
