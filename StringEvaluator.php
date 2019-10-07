@@ -9,7 +9,7 @@ class StringEvaluator
     {
         $this->solver = new DefaultOperationProvider();
         try {
-            $res = $this->prepareFlat($expression);
+            $res = $this->solve($expression);
         } catch (Exception $e) {
             return $e->getMessage();
         }
