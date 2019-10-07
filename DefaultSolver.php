@@ -4,31 +4,26 @@
 namespace Arz\StringEvaluationBundle;
 
 
-class DefaultSolver implements SolverInterface
+class DefaultOperationProvider implements IOperationsProvider
 {
 
-    public function add($l, $r)
+    public function getOperationCallback($operation)
     {
-        return $l + $r;
-    }
-
-    public function subtract($l, $r)
-    {
-        return $l - $r;
-    }
-
-    public function multiply($l, $r)
-    {
-        return $l * $r;
-    }
-
-    public function divide($l, $r)
-    {
-        return $l / $r;
-    }
-
-    public function isValidNumber($a_num)
-    {
-        return true;
+        switch ($operation){
+            case '+':
+                return function ($l, $r) {return $l + $r;};
+                break;
+            case '-':
+                return function ($l, $r) {return $l - $r;};
+                break;
+            case '*':
+                return function ($l, $r) {return $l * $r;};
+                break;
+            case '/':
+                return function ($l, $r) {return $l / $r;};
+                break;
+            default:
+                throw new \Exception('Неопределенная операция');
+        }
     }
 }
