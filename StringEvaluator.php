@@ -7,16 +7,17 @@ class StringEvaluator
 {
     public function evaluate($expression)
     {
+        $this->solver = new DefaultSolver();
         try {
-            $res = $this->solveFlat2($expression);
+            $res = $this->prepareFlat($expression);
         } catch (Exception $e) {
             return $e->getMessage();
         }
         return $res;
     }
 
-    private $solver;
-
+    private $operationsProvider;
+    private $operations = ['*', '/', '+', '-'];
     /**
      * @param $expression
      * @return string
@@ -24,57 +25,88 @@ class StringEvaluator
      */
     private function solve($expression){
         $flatExpression = $this->flatten($expression);
-        $flatExpression = trim($flatExpression);
-        if (strlen($flatExpression) == 0) throw new Exception('Пустое выражение');
+        if (!$this->isValid($flatExpression)) throw new Exception('Неверное выражение');
         $res = $this->solveFlat($flatExpression);
         return $res;
     }
 
-    private function solveFlat($flatExpression){
-        $operationsMap = $this->getOperationsMap();
-        foreach ($operationsMap as $priorityLevel){
-            foreach ($priorityLevel as $operationDesc){
-                while(($pos = strpos($flatExpression, $operationDesc[0])) !== false) {
-                    if ($operationDesc[1] === 'b') {
-                        $rPos = $this->parseNumberRight($flatExpression, $pos + 1);
-                        $lPos = $this->parseNumberLeft($flatExpression, $pos - 1);
-                        $r = trim(substr($flatExpression, $pos + 1, $rPos - $pos));
-                        $l = trim(substr($flatExpression, $pos - 1, $pos - $lPos));
-                        $res = $operationDesc[2]($l, $r);
-                        $flatExpression = substr($flatExpression, 0, $lPos) . $res . substr($flatExpression, $rPos + 1, strlen($flatExpression) - $rPos - 2);
-                    } else {
-                        throw new Exception('Встречен неизвестный вид операции');
+    private function isValid($expresstion) {
+        if (preg_match('#(\s*-?[0-9]+(\.[0-9]+)?\s*[-,+,\/,*])*\s*-?[0-9]+(\.[0-9]+)?\s*#', $expresstion, $matches) !== 1) return false;
+        if ($matches[0] == $expresstion) return true;
+        return false;
+    }
+
+    private  function solveFlat($expression)
+    {
+        $expression = trim($expression);
+        $numOperMap = $this->prepareFlat($expression);
+        $this->processOperations($numOperMap, ['*', '/']);
+        $this->processOperations($numOperMap, ['+', '-']);
+        return $numOperMap['numbers'][0];
+    }
+
+    private function processOperations($numOperMap, $operationsToProcess){
+        $callbacks = [];
+        foreach ($this->operations as $o){
+            $callbacks[$o] = $this->operationsProvider->getOperationCallback[$o];
+        }
+        $operCnt = count($numOperMap['operations']);
+        $i = 0;
+        while($i < $operCnt) {
+            $operation = $numOperMap['operations'][$i];
+            if (in_array($operation, $operationsToProcess)) {
+                $numOperMap['numbers'][$i] = $callbacks[$operation]($numOperMap['numbers'][$i], $numOperMap['numbers'][$i + 1]);
+                array_splice($numOperMap['numbers'], $i + 1, 1);
+                array_splice($numOperMap['operations'], $i, 1);
+                $operCnt -= 1;
+            }
+            else ++$i;
+        }
+    }
+
+    private function prepareFlat($flatExpression){
+        preg_match_all('#[0-9]+(\.[0-9]+)?#', $flatExpression, $matches, PREG_OFFSET_CAPTURE);
+        $numbers = $matches[0];
+        $cnt = count($numbers);
+        $firstNumPos = $numbers[0][1];
+        if ($firstNumPos > 0) {
+            if (trim(substr($flatExpression, 0, $firstNumPos)) == '-') {
+                $numbers[0][0] = '-'.$numbers[0][0];
+                $numbers[0][1] -= 1;
+            }
+        }
+        if ($cnt == 1) return ['numbers' => [$numbers[0][0]], 'operations' => []];
+        $operations = [];
+        for ($i = 0, $j = 1; $j < $cnt; ++$i, ++$j) {
+            $startPos = $numbers[$i][1] + strlen($numbers[$i][0]);
+            $endPos = $numbers[$j][1];
+            $operationHolder = substr($flatExpression, $startPos, $endPos - $startPos);
+            foreach (['*', '/', '+', '-'] as $operation){
+                $pos = strpos($operationHolder, $operation);
+                if ($pos !== false){
+                    $operations[] = $operation;
+                    if ($pos < strlen($operationHolder) - 1){
+                        if ($operationHolder[strlen($operationHolder) - 1] == '-'){
+                            $numbers[$j][0] = '-'.$numbers[$j][0];
+                            $numbers[$j][1] -= 1;
+                        }
                     }
                 }
             }
         }
-        return $flatExpression;
-    }
-
-    private function solveFlat2($flatExpression){
-        preg_match_all('#[0-9]+(\.[0-9]+)?#', $flatExpression, $matches, PREG_OFFSET_CAPTURE);
-        return var_dump($matches);
-    }
-
-    private function parseNumberRight($expression, $pos){
-        return 0;
-    }
-
-    private function parseNumberLeft($expression, $pos){
-        return 0;
+        $numbers = array_column($numbers, 0);
+        return ['numbers' => $numbers, 'operations' => $operations];
     }
 
     private function flatten($expression){
         $pos = strpos($expression, '(');
-        $oPos = strpos($expression, ')');
-        if ($oPos < $pos) throw new \Exception('Лишняя открывающая скобка');
         while ($pos !== false) {
+            $oPos = strpos($expression, ')');
+            if ($oPos < $pos) throw new \Exception('Лишняя открывающая скобка');
             $closing_pos = $this->findClosingBracket(substr($expression, $pos + 1));
             $value = $this->solve(substr($expression, $pos + 1, $closing_pos));
-            $expression = substr($expression, 0, $pos) . $value . substr($expression, $pos + $closing_pos + 1);
+            $expression = substr($expression, 0, $pos) . $value . substr($expression, $pos + $closing_pos + 2);
             $pos = strpos($expression, '(');
-            $oPos = strpos($expression, ')');
-            if ($oPos < $pos) throw new Exception('Лишняя открывающая скобка');
         }
         return $expression;
     }
@@ -89,20 +121,5 @@ class StringEvaluator
         }
         if ($trigger > 0) throw new Exception('Отсутствует закрывающая скобка');
         return $i;
-    }
-
-    public function getOperationsMap()
-    {
-        $operationsMap = [
-            [
-                ['*', 'b', function($l, $r){return $this->solver->multiply($l, $r);}],
-                ['/', 'b', function($l, $r){return $this->solver->divide($l, $r);}],
-            ],
-            [
-                ['+', 'b', function($l, $r){return $this->solver->add($l, $r);}],
-                ['-', 'b', function($l, $r){return $this->solver->subtract($l, $r);}],
-            ]
-        ];
-        return $operationsMap;
     }
 }
