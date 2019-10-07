@@ -46,7 +46,7 @@ class StringEvaluator
         return $numOperMap['numbers'][0];
     }
 
-    private function processOperations($numOperMap, $operationsToProcess){
+    private function processOperations(&$numOperMap, $operationsToProcess){
         $callbacks = [];
         foreach ($this->operations as $o){
             $callbacks[$o] = $this->operationsProvider->getOperationCallback($o);
