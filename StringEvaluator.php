@@ -8,6 +8,7 @@ class StringEvaluator
     public function evaluate($expression)
     {
         $this->operationsProvider = new DefaultOperationProvider();
+        $this->operations = ['*', '/', '+', '-'];
         try {
             $res = $this->solve($expression);
         } catch (Exception $e) {
@@ -17,7 +18,7 @@ class StringEvaluator
     }
 
     private $operationsProvider;
-    private $operations = ['*', '/', '+', '-'];
+    private $operations;
     /**
      * @param $expression
      * @return string
@@ -48,7 +49,7 @@ class StringEvaluator
     private function processOperations($numOperMap, $operationsToProcess){
         $callbacks = [];
         foreach ($this->operations as $o){
-            $callbacks[$o] = $this->operationsProvider->getOperationCallback([$o]);
+            $callbacks[$o] = $this->operationsProvider->getOperationCallback($o);
         }
         $operCnt = count($numOperMap['operations']);
         $i = 0;
