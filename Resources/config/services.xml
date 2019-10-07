@@ -8,8 +8,9 @@
         <defaults autowire="true" autoconfigure="true" public="false"/>
         <service id="Arz\StringEvaluationBundle\DefaultOperationProvider" public="false"/>
         <service id="default.operation.provider" alias="Arz\StringEvaluationBundle\DefaultOperationProvider" public="true"/>
-		<service id="Arz\StringEvaluationBundle\StringEvaluator" public="true">
+		<service id="Arz\StringEvaluationBundle\StringEvaluator" public="false">
             <argument key="$operationsProvider" type="service" id="default.operation.provider"/>
         </service>
+        <service id="string.evaluator" alias="Arz\StringEvaluationBundle\DefaultOperationProvider" public="true"/>
     </services>
 </container>
