@@ -7,7 +7,7 @@ class StringEvaluator
 {
     public function evaluate($expression)
     {
-        $this->solver = new DefaultSolver();
+        $this->solver = new DefaultOperationProvider();
         try {
             $res = $this->prepareFlat($expression);
         } catch (Exception $e) {
